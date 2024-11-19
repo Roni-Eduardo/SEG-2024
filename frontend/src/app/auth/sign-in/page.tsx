@@ -3,83 +3,87 @@ import { Button, Stack, TextField, Typography } from "@mui/material";
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Traco } from "../../components/ui/traco";
-import { ICredential } from "../../../@libs/types";
+import { IUser } from "../../../@libs/types";
 import { AuthService } from "../../../services/auth-service";
-import { useAuth } from "../../../hooks/useAuth";
+import { toast } from "react-toastify";
 
-function SignInPage() {
+
+function SignUpPage() {
   const navigate = useNavigate();
 
   //State - Loading
   const [loading, setLoading] = useState(false)
 
-  const { setUser } = useAuth();
-
-  const [credential, setCredential] = useState<ICredential>({
-    username: '',
-    password: ''
+  const [user, setUser] = useState<IUser>({
+    name: '',
+    email: '',
+    password: '',
   });
 
-  async function handleSignIn(event: FormEvent) {
+  async function handleSignUp(event: FormEvent) {
     event.preventDefault();
 
     setLoading(true);
 
-    AuthService.signIn(credential)
-      .then(result => {
-        navigate('/');
-
-        setUser({
-          uid: result.user.id,
-          email: result.user.email || '',
-          name: result.user.user_metadata?.name
-        });
+    AuthService.signUp(user)
+      .then(() => {
+        toast.success('Conta criada com sucesso!')
+        navigate('/auth/sign-in')
       })
       .catch(error => {
-        console.log('PAU ', error)
+        toast.error(String(error))
       })
       .finally(() => {
         setLoading(false)
-      })
+      });   
   }
 
   return (
-    <form onSubmit={handleSignIn}>
+    <form onSubmit={handleSignUp}>
       <Stack
         direction="column"
         alignItems="center"
         gap={1}
       >
-        <Typography
+        <Typography 
           variant="h5"
         >
-          Faça o Login
+          Crie uma Conta
         </Typography>
-        <Typography
+        <Typography 
           variant="subtitle1"
           sx={{
             marginBottom: '2rem'
           }}
         >
-          Já tem uma conta?
+          Ainda não tem uma conta?
         </Typography>
 
-        <TextField
-          label="Usuário"
+        <TextField 
+          label="Nome Completo"
           required
           fullWidth
-          value={credential.username}
-          onChange={event => setCredential({ ...credential, username: (event.target as HTMLInputElement).value })} />
+          value={user.name}
+          onChange={event => setUser({ ...user, name: (event.target as HTMLInputElement).value })} />
 
-        <TextField
+
+        <TextField 
+          label="E-mail"
+          type="email"
+          required
+          fullWidth
+          value={user.email}
+          onChange={event => setUser({ ...user, email: (event.target as HTMLInputElement).value })} />
+
+        <TextField 
           label="Senha"
           required
           fullWidth
           type="password"
-          value={credential.password}
-          onChange={event => setCredential({ ...credential, password: (event.target as HTMLInputElement).value })} />
+          value={user.password}
+          onChange={event => setUser({ ...user, password: (event.target as HTMLInputElement).value })} />
 
-        <LoadingButton
+        <LoadingButton 
           type="submit"
           variant="contained"
           size="large"
@@ -88,7 +92,7 @@ function SignInPage() {
             marginTop: '2rem'
           }}
         >
-          Acessar
+          Criar Conta
         </LoadingButton>
 
         <Stack
@@ -100,7 +104,7 @@ function SignInPage() {
           }}
         >
           <Traco />
-          <Typography
+          <Typography 
             component="h5"
             sx={{
               margin: '0 8px'
@@ -111,29 +115,29 @@ function SignInPage() {
           <Traco />
         </Stack>
 
-        <Typography
+        <Typography 
           variant="h5"
         >
-          Crie uma Conta
+          Faça o Login
         </Typography>
-        <Typography
+        <Typography 
           variant="subtitle1"
         >
-          Ainda não tem uma conta?
+          Já tem uma conta?
         </Typography>
         <Button
           variant="outlined"
           size="large"
-          onClick={() => navigate('/auth/sign-up')}
+          onClick={() => navigate('/auth/sign-in')}
           sx={{
             marginTop: '2rem'
           }}
         >
-          Criar Conta
+          Acessar a Conta
         </Button>
       </Stack>
     </form>
   )
 }
 
-export default SignInPage;
+export default SignUpPage;
